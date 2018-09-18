@@ -91,8 +91,6 @@ DIC_COMPARE <- function(doc.df){
     }
     diag_word_df <- rbind(diag_word_df,diag_word_tmp_df)
 
-
+    return(diag_word_df)
 }
 
-
-stack(list(v1=c(1,2,3),v2=c(4,5,6),v3=c(7,8,9)))
