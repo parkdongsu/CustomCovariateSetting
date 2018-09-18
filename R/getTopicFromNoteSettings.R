@@ -39,6 +39,7 @@ library(parallel)
 useSejongDic()
 
 
+
 getTopicFromNoteSettings <- function(connection,
                                      oracleTempSchema = NULL,
                                      cdmDatabaseSchema,
@@ -53,56 +54,59 @@ getTopicFromNoteSettings <- function(connection,
     if (covariateSettings$useTopicFromNote == FALSE) {
         return(NULL)
     }
+    if (covariateSettings$useDictionary == TRUE){
+        # Some SQL to construct the covariate:
+        sql <- paste(
+            'SELECT TOP 1000 @row_id_field AS row_id,',
+            'n.NOTE_TEXT AS covariate_id,',
+            '1 AS covariate_value',
+            'FROM @cdm_database_schema.NOTE n',
+            'JOIN @cohort_table c',
+            'ON n.person_id = c.subject_id',
+            'AND n.NOTE_DATE = c.COHORT_START_DATE',
+            'WHERE NOTE_TYPE_CONCEPT_ID = 44814637',
+            "{@cohort_id != -1} ? {AND cohort_definition_id = @cohort_id}")
+
+        sql <- SqlRender::renderSql(sql,
+                                    cohort_table = cohortTable,
+                                    cohort_id = cohortId,
+                                    row_id_field = rowIdField,
+                                    cdm_database_schema = cdmDatabaseSchema)$sql
+        sql <- SqlRender::translateSql(sql, targetDialect = attr(connection, "dbms"))$sql
+
+
+
+        # Retrieve the covariate:
+        covariates <- DatabaseConnector::querySql.ffdf(connection, sql)
+
+        row_id              <-  covariates$ROW_ID
+        covariates_value    <- covariates$COVARIATE_ID
+
+        covariates <- WORD_LOAD(row_id,covariates_value)
+
+        # Convert colum names to camelCase:
+        colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
+
+        # Construct covariate reference:
+        covariateRef <- data.frame(covariateId = 1,
+                                   covariateName = "Length of observation",
+                                   analysisId = 1,
+                                   conceptId = 0)
+        covariateRef <- ff::as.ffdf(covariateRef)
+        # Construct analysis reference:
+        analysisRef <- data.frame(analysisId = 1,
+                                  analysisName = "Length of observation",
+                                  domainId = "Demographics",
+                                  startDay = 0,
+                                  endDay = 0,
+                                  isBinary = "N",
+                                  missingMeansZero = "Y")
+        analysisRef <- ff::as.ffdf(analysisRef)
+    }
 
     if (aggregated)
         stop("Aggregation not supported")
-    # Some SQL to construct the covariate:
-    sql <- paste(
-        'SELECT TOP 1000 @row_id_field AS row_id,',
-        'n.NOTE_TEXT AS covariate_value,',
-        '1 AS covariate_id',
-        'FROM @cdm_database_schema.NOTE n',
-        'JOIN @cohort_table c',
-        'ON n.person_id = c.subject_id',
-        'AND n.NOTE_DATE = c.COHORT_START_DATE',
-        'WHERE NOTE_TYPE_CONCEPT_ID = 44814637',
-        "{@cohort_id != -1} ? {AND cohort_definition_id = @cohort_id}")
 
-    sql <- SqlRender::renderSql(sql,
-                                cohort_table = cohortTable,
-                                cohort_id = cohortId,
-                                row_id_field = rowIdField,
-                                cdm_database_schema = cdmDatabaseSchema)$sql
-    sql <- SqlRender::translateSql(sql, targetDialect = attr(connection, "dbms"))$sql
-
-
-
-    # Retrieve the covariate:
-    covariates <- DatabaseConnector::querySql.ffdf(connection, sql)
-
-    row_id              <-  covariates$ROW_ID
-    covariates_value    <- covariates$COVARIATE_VALUE
-
-    covariates <- WORD_LOAD(row_id,covariates_value)
-
-    # Convert colum names to camelCase:
-    colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
-
-    # Construct covariate reference:
-    covariateRef <- data.frame(covariateId = 1,
-                               covariateName = "Length of observation",
-                               analysisId = 1,
-                               conceptId = 0)
-    covariateRef <- ff::as.ffdf(covariateRef)
-    # Construct analysis reference:
-    analysisRef <- data.frame(analysisId = 1,
-                              analysisName = "Length of observation",
-                              domainId = "Demographics",
-                              startDay = 0,
-                              endDay = 0,
-                              isBinary = "N",
-                              missingMeansZero = "Y")
-    analysisRef <- ff::as.ffdf(analysisRef)
     # Construct analysis reference:
     metaData <- list(sql = sql, call = match.call())
     result <- list(covariates = covariates,

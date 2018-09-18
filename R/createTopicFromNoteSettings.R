@@ -6,8 +6,12 @@
 #' @export
 #' @examples
 #' createTopicFromNoteSettings()
-createTopicFromNoteSettings <- function(useTopicFromNote = TRUE){
-    covariateSettings <- list(useTopicFromNote = useTopicFromNote)
+createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
+                                        useDictionary=TRUE,
+                                        useEmbedding = TRUE){
+    covariateSettings <- list(useTopicFromNote = useTopicFromNote,
+                              useDictionary=useDictionary,
+                              useEmbedding = useEmbedding)
     attr(covariateSettings,'fun') <- 'getTopicFromNoteSettings'
     class(covariateSettings) <- 'covariateSettings'
     return(covariateSettings)

@@ -21,3 +21,6 @@ POS_ANALYSIS <- function(word_df){
     }
     return(result_word_list)
 }
+
+
+

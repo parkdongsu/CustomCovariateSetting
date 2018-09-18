@@ -27,7 +27,7 @@ NLP_PROCESSING_FUNCTION <- function(result_xml_df){
 
     xml_df <- search_df[tag]
 
-    word_df <- as.data.frame(parallel::parApply(myCluster,xml_df,1,NLP_PROCESSING))
+    word_df <- as.data.frame(parallel::parApply(myCluster,xml_df,1,NLP_PROCESSING),stringsAsFactors = F)
 
     result_word_list <- apply(word_df,1,POS_ANALYSIS)
 
