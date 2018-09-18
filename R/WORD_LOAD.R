@@ -13,8 +13,9 @@ WORD_LOAD <- function(rowid,covariatesvalue){
     doc.df <- NLP_PROCESSING_FUNCTION(result_xml_df)
 
     df <- DIC_COMPARE(doc.df)
-
     df <- cbind(df,rep(1,nrow(df)))
+    colnames(df) <- c('row_id','covariate_id','covariate_value')
+
 
     return(df)
 }
