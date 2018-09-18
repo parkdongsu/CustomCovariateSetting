@@ -11,14 +11,13 @@ NLP_PROCESSING_FUNCTION <- function(result_xml_df){
     numCores <- parallel::detectCores() - 1
 
     myCluster <- parallel::makeCluster(numCores)
-    
+
     search_df <- result_xml_df[result_xml_df$`<MN>`=='현병력',]
-    
-    tag ='<TD>' 
-    
+
+    tag ='<TD>'
 
     search_df[,tag][is.na(search_df[,tag])] <- ""
-    
+
     for (i in nrow(search_df):1){
         if(search_df[i,tag] == ""){
             search_df <- search_df[-i,]
@@ -26,19 +25,19 @@ NLP_PROCESSING_FUNCTION <- function(result_xml_df){
     }
 
     xml_df <- search_df[tag]
-    
-    word_df <- as.data.frame(parApply(myCluster,xml_df,1,NLP_PROCESSING))
-    
+
+    word_df <- as.data.frame(parallel::parApply(myCluster,xml_df,1,NLP_PROCESSING))
+
     result_word_list <- apply(word_df,1,POS_ANALYSIS)
 
     result_word_list<- unlist(result_word_list)
 
     doc.list <- parallel::parLapply(myCluster,result_word_list,K_POS_EXTRACTION)
- 
+
     doc.df <- data.frame('word' = unlist(doc.list),'row_id' = search_df$row_id ,stringsAsFactors = FALSE)
-    
+
     parallel::stopCluster(myCluster)
-    
+
     return(doc.df)
-    
+
 }

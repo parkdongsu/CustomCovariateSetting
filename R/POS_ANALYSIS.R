@@ -7,11 +7,12 @@
 #' @examples
 #' POS_ANALYSIS()
 POS_ANALYSIS <- function(word_df){
+    useSejongDic()
     word_list <- KoNLP::SimplePos22(word_df)
     if(length(word_list) ==1){
         word_vector <- word_list[[1]]
         result_word_list <- c(word_vector)
-    } 
+    }
     else{
         word_vector <- word_list[[1]]
         for (k in 2:length(word_list)){
