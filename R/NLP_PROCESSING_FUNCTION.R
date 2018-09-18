@@ -8,6 +8,7 @@
 #' NLP_PROCESSING_FUNCTION()
 NLP_PROCESSING_FUNCTION <- function(result_xml_df){
 
+
     numCores <- parallel::detectCores() - 1
 
     myCluster <- parallel::makeCluster(numCores)

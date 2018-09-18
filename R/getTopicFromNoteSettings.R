@@ -32,7 +32,6 @@ if(!require(parallel)) {
     install.packages("parallel")
 }
 
-library(parallel)
 library(KoNLP)
 library(rJava)
 library(stringr)
