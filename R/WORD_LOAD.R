@@ -7,12 +7,15 @@
 #' @examples
 #' WORD_LOAD()
 WORD_LOAD <- function(rowid,covariatesvalue){
-    
+    rowid <- row_id
+    covariatesvalue <- covariates_value
     result_xml_df <- XML_PASING_FUNCTION(rowid,covariatesvalue)
-    
+
     doc.df <- NLP_PROCESSING_FUNCTION(result_xml_df)
-    
-    
-    
-    return(doc.df)
+
+    df <- DIC_COMPARE(doc.df)
+
+    df <- cbind(df,rep(1,nrow(df)))
+
+    return(df)
 }
