@@ -36,7 +36,7 @@ library(KoNLP)
 library(rJava)
 library(stringr)
 library(parallel)
-
+useSejongDic()
 
 
 getTopicFromNoteSettings <- function(connection,
