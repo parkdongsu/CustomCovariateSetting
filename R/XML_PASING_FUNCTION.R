@@ -28,6 +28,8 @@ XML_PASING_FUNCTION <- function(rowid,covariatesvalue){
         }
     }
 
+    result_tmp_df <- data.frame(stringsAsFactors = F)
+    result_xml_df <- data.frame(stringsAsFactors = F)
     div = 1000
     flag <- 0
     if(div >= length(result_xml_list)){
