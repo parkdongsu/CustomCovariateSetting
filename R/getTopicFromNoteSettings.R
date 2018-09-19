@@ -83,21 +83,58 @@ getTopicFromNoteSettings <- function(connection,
 
         # Retrieve the covariate:
         covariates <- DatabaseConnector::querySql.ffdf(connection, sql)
+        class(covariates)
 
         row_id              <-  covariates$ROW_ID
         covariates_value    <- covariates$COVARIATE_ID
 
         covariates <- WORD_LOAD(row_id,covariates_value)
 
-        # Convert colum names to camelCase:
-        colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
+        # # Convert colum names to camelCase:
+        # colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
+        #
+        # ####unique numeric Id for each covariates###################
+        # covariates.df<-data.frame(covariates$covariates)
+        # covariates.factor<-as.factor(covariates.df$covariateId)
+        #
+        # word <- levels(covariates.factor)
+        # num <- seq(levels(covariates.factor))
+        #
+        # mapping_df <- data.frame('word' = word, 'num' = num,stringsAsFactors = F)
+        # ############################################################
+        #
+        #
+        #
+        #
+        #
+        # covariates.df$rowId<-as.numeric(as.factor(covariates.df$rowId))
+        # covariates.df$covariateId<-as.numeric(as.factor(covariates.df$covariateId))
+        # head(covariates.df)
+        #
+        # data <- Matrix::sparseMatrix(i=covariates.df$rowId,
+        #                              j=covariates.df$covariateId,
+        #                              x=covariates.df$covariateValue,
+        #                              dims=c(max(covariates.df$rowId), max(covariates.df$covariateId))) # edit this to max(map$newIds)
+        #
+        # ##Text2Vec
+        # colnames(data) <- unique(covariates.df$covariateId)
+        #
+        # ##Topic Modeling
+        # lda_model = LDA$new(n_topics = covariateSettings$numberOfTopics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+        # doc_topic_distr =
+        #     lda_model$fit_transform(x = data, n_iter = 1000,
+        #                             convergence_tol = 0.001, n_check_convergence = 25,
+        #                             progressbar = FALSE)
+        #
+        # data.frame(doc_topic_distr)
 
         # Construct covariate reference:
-        covariateRef <- data.frame(covariateId = 1,
+        covariateRef  <- data.frame(covariateId = 1,
                                    covariateName = "Length of observation",
                                    analysisId = 1,
                                    conceptId = 0)
         covariateRef <- ff::as.ffdf(covariateRef)
+
         # Construct analysis reference:
         analysisRef <- data.frame(analysisId = 1,
                                   analysisName = "Length of observation",
