@@ -44,7 +44,7 @@ getTopicFromNoteSettings <- function(connection,
                                      oracleTempSchema = NULL,
                                      cdmDatabaseSchema,
                                      cohortTable = "cohort",
-                                     cohortId = -1,
+                                     #cohortId = -1, #cohortId 미지정
                                      cdmVersion = "5",
                                      rowIdField = "subject_id",
                                      covariateSettings,
@@ -65,7 +65,11 @@ getTopicFromNoteSettings <- function(connection,
             'ON n.person_id = c.subject_id',
             'AND n.NOTE_DATE = c.COHORT_START_DATE',
             'WHERE NOTE_TYPE_CONCEPT_ID = 44814637',
-            "{@cohort_id != -1} ? {AND cohort_definition_id = @cohort_id}")
+            #cohord_id가 지정되었을 때
+            'AND cohort_id = @cohortId'
+            )
+        #cohort_id가 지정되지 않았을 때
+        #"{@cohort_id != -1} ? {AND cohort_definition_id = @cohort_id}"
 
         sql <- SqlRender::renderSql(sql,
                                     cohort_table = cohortTable,

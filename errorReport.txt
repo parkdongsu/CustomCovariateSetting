@@ -1,0 +1,28 @@
+DBMS:
+sql server
+
+Error:
+cannot allocate vector of size 2 Kb
+
+SQL:
+SELECT subject_id AS row_id, n.NOTE_TEXT AS covariate_id, 1 AS covariate_value FROM Dolphin_CDM.dbo.NOTE n JOIN cohort c ON n.person_id = c.subject_id AND n.NOTE_DATE = c.COHORT_START_DATE WHERE NOTE_TYPE_CONCEPT_ID = 44814637 
+
+R version:
+R version 3.4.4 (2018-03-15)
+
+Platform:
+x86_64-w64-mingw32
+
+Attached base packages:
+- stats
+- graphics
+- grDevices
+- utils
+- datasets
+- methods
+- base
+
+Other attached packages:
+- CustomCovariateSetting (0.1.0)
+- KoNLP (0.80.1)
+- DatabaseConnector (2.1.4)
