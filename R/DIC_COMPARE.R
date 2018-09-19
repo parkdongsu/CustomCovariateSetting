@@ -76,6 +76,7 @@ DIC_COMPARE <- function(doc.df){
         eng_word <- gsub('[^a-zA-Z]','',word)
         eng_word[length(eng_word)+1] <- c("")
         only_eng <- eng_word[-which(eng_word == "")]
+        only_eng <- unique(only_eng)
 
 
         diag_word <- c(intersect(word,word_storage),only_eng)
