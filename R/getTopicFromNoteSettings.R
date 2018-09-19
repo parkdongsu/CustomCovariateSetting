@@ -58,7 +58,7 @@ getTopicFromNoteSettings <- function(connection,
     if (covariateSettings$useDictionary == TRUE){
         # Some SQL to construct the covariate:
         sql <- paste(
-            'SELECT top 10000 @row_id_field AS row_id,',
+            'SELECT top 100 @row_id_field AS row_id,',
             'n.NOTE_TEXT AS covariate_id,',
             '1 AS covariate_value',
             'FROM @cdm_database_schema.NOTE n',

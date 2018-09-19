@@ -1,12 +1,12 @@
 #' Custom createCoveriate Settings
 #'
 #' This function is Custom createCoveriate Settings.
-#' @param 
+#' @param
 #' @keywordsa createCovariateSetting
 #' @export
 #' @examples
 #' diction()
 diction <- function(){
-    dic <- read.csv('D:/Dongsu/NLP_Sample/R_CODE/DIC/medi_dic.csv')
+    dic <- read.csv('D:/Dongsu/NLP_Sample/R_CODE/DIC/medi_dic.csv',stringsAsFactors = F)
     return(dic)
 }
