@@ -83,12 +83,16 @@ getTopicFromNoteSettings <- function(connection,
 
         # Retrieve the covariate:
         covariates <- DatabaseConnector::querySql.ffdf(connection, sql)
-        class(covariates)
 
         row_id              <-  covariates$ROW_ID
         covariates_value    <- covariates$COVARIATE_ID
 
         covariates <- WORD_LOAD(row_id,covariates_value)
+
+        if(covariateSettings$useTopicModeling == TRUE){
+
+        }
+
 
         # # Convert colum names to camelCase:
         # colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
