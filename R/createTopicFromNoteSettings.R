@@ -18,7 +18,10 @@ createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
     if (sum (useTextToVec,useTopicModeling,useGloVe,useAutoencoder) != 1 ) print ("Choose only one among useTextToVec,useTopicModeling,useGloVe,useAutoencoder")
     covariateSettings <- list(useTopicFromNote = useTopicFromNote,
                               useDictionary=useDictionary,
-                              useEmbedding = useEmbedding)
+                              useTextToVec=useTextToVec,
+                              useTopicModeling=useTopicModeling,
+                              useGloVe=useGloVe,
+                              useAutoencoder=useAutoencoder)
     attr(covariateSettings,'fun') <- 'getTopicFromNoteSettings'
     class(covariateSettings) <- 'covariateSettings'
     return(covariateSettings)
