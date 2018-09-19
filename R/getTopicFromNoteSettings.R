@@ -45,6 +45,7 @@ getTopicFromNoteSettings <- function(connection,
                                      cdmDatabaseSchema,
                                      cohortTable = "cohort",
                                      #cohortId = -1, #cohortId 미지정
+                                     cohortId = cohortId, # cohortId 지정
                                      cdmVersion = "5",
                                      rowIdField = "subject_id",
                                      covariateSettings,
