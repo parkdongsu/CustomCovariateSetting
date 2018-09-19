@@ -67,7 +67,7 @@ getTopicFromNoteSettings <- function(connection,
             'AND n.NOTE_DATE = c.COHORT_START_DATE',
             'WHERE NOTE_TYPE_CONCEPT_ID = 44814637',
             #cohord_id가 지정되었을 때
-            'AND cohort_id = @cohortId'
+            'AND cohort_id = @cohort_id'
             )
         #cohort_id가 지정되지 않았을 때
         #"{@cohort_id != -1} ? {AND cohort_definition_id = @cohort_id}"
