@@ -15,21 +15,30 @@ createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
                                         LatentDimensionForGlove = 100L,
                                         useAutoencoder=FALSE,
                                         LatentDimensionForAutoEncoder = 100L){
-    if (sum (useTextToVec,useTopicModeling,useGloVe,useAutoencoder) != 1 ) print ("Choose only one among useTextToVec,useTopicModeling,useGloVe,useAutoencoder")
-    covariateSettings <- list(useTopicFromNote = useTopicFromNote,
-                              useDictionary=useDictionary,
-                              useTextToVec=useTextToVec,
-                              useTopicModeling=useTopicModeling,
-                              useGloVe=useGloVe,
-                              useAutoencoder=useAutoencoder)
-    attr(covariateSettings,'fun') <- 'getTopicFromNoteSettings'
-    class(covariateSettings) <- 'covariateSettings'
-    return(covariateSettings)
+    if(useDictionary == FALSE){
+        print('Not implemented.')
+    }
+    else{
+        if (sum (useTextToVec,useTopicModeling,useGloVe,useAutoencoder) != 1 ) {
+            print ("Choose only one among useTextToVec,useTopicModeling,useGloVe,useAutoencoder")
+        }
+        else{
+            covariateSettings <- list(useTopicFromNote = useTopicFromNote,
+                                      useDictionary=useDictionary,
+                                      useTextToVec=useTextToVec,
+                                      useTopicModeling=useTopicModeling,
+                                      useGloVe=useGloVe,
+                                      useAutoencoder=useAutoencoder)
+            attr(covariateSettings,'fun') <- 'getTopicFromNoteSettings'
+            class(covariateSettings) <- 'covariateSettings'
+            return(covariateSettings)
+        }
+    }
 }
 
 
 
-#
+FeatureExtraction::createCovariateSettings(useDemographicsGender = F)
 
 
 

@@ -57,6 +57,6 @@ NLP_PROCESSING <- function(xmldf){
     xmldf <- stringr::str_replace_all(xmldf,"[[:space:]]{1,}"," ")
 
     xmldf <- paste(xmldf,'.',sep = '')
-    
+
     return(xmldf)
 }

@@ -36,6 +36,10 @@ library(KoNLP)
 library(rJava)
 library(stringr)
 library(parallel)
+library(caret)
+library(dplyr)
+library(text2vec)
+library(e1071)
 useSejongDic()
 
 
@@ -89,48 +93,67 @@ getTopicFromNoteSettings <- function(connection,
 
         covariates <- WORD_LOAD(row_id,covariates_value)
 
+        # Convert colum names to camelCase:
+        colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
+
+        ####unique numeric Id for each covariates###################
+        covariates.df<-data.frame(covariates)
+
+        covariateId.factor<-as.factor(covariates.df$covariateId)
+
+        word <- levels(covariateId.factor)
+        num <- seq(levels(covariateId.factor))
+
+        covariateId_mapping_df <- data.frame('word' = word, 'num' = num,stringsAsFactors = F)
+
+        covariateRowId.factor<-as.factor(covariates.df$rowId)
+
+        rowId <- levels(covariateRowId.factor)
+        num <- seq(levels(covariateRowId.factor))
+
+        rowId_mapping_df <- data.frame('rowId' = rowId, 'num' = num,stringsAsFactors = F)
+
+        ############################################################
+
+        if(covariateSettings$useTextToVec == TRUE){
+            ##Text2Vec
+            covariates <- covariates
+        }
+
         if(covariateSettings$useTopicModeling == TRUE){
+
+            covariates.df$rowId<-as.numeric(as.factor(covariates.df$rowId))
+            covariates.df$covariateId<-as.numeric(as.factor(covariates.df$covariateId))
+            covariates.df
+
+            data <- Matrix::sparseMatrix(i=covariates.df$rowId,
+                                         j=covariates.df$covariateId,
+                                         x=covariates.df$covariateValue,
+                                         dims=c(max(covariates.df$rowId), max(covariates.df$covariateId))) # edit this to max(map$newIds)
+
+
+            colnames(data) <- unique(covariates.df$covariateId)
+
+            ##Topic Modeling
+            lda_model = LDA$new(n_topics = covariateSettings$numberOfTopics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+            doc_topic_distr =   lda_model$fit_transform(x = data, n_iter = 1000,
+                                                        convergence_tol = 0.001, n_check_convergence = 25,
+                                                        progressbar = FALSE)
+
+            data.frame(doc_topic_distr)
+
+        }
+
+        if(covariateSettings$useGloVe == TRUE){
+
+        }
+
+        if(covariateSettings$useAutoencoder == TRUE){
 
         }
 
 
-        # # Convert colum names to camelCase:
-        # colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
-        #
-        # ####unique numeric Id for each covariates###################
-        # covariates.df<-data.frame(covariates$covariates)
-        # covariates.factor<-as.factor(covariates.df$covariateId)
-        #
-        # word <- levels(covariates.factor)
-        # num <- seq(levels(covariates.factor))
-        #
-        # mapping_df <- data.frame('word' = word, 'num' = num,stringsAsFactors = F)
-        # ############################################################
-        #
-        #
-        #
-        #
-        #
-        # covariates.df$rowId<-as.numeric(as.factor(covariates.df$rowId))
-        # covariates.df$covariateId<-as.numeric(as.factor(covariates.df$covariateId))
-        # head(covariates.df)
-        #
-        # data <- Matrix::sparseMatrix(i=covariates.df$rowId,
-        #                              j=covariates.df$covariateId,
-        #                              x=covariates.df$covariateValue,
-        #                              dims=c(max(covariates.df$rowId), max(covariates.df$covariateId))) # edit this to max(map$newIds)
-        #
-        # ##Text2Vec
-        # colnames(data) <- unique(covariates.df$covariateId)
-        #
-        # ##Topic Modeling
-        # lda_model = LDA$new(n_topics = covariateSettings$numberOfTopics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
-        # doc_topic_distr =
-        #     lda_model$fit_transform(x = data, n_iter = 1000,
-        #                             convergence_tol = 0.001, n_check_convergence = 25,
-        #                             progressbar = FALSE)
-        #
-        # data.frame(doc_topic_distr)
+
 
         # Construct covariate reference:
         covariateRef  <- data.frame(covariateId = 1,
