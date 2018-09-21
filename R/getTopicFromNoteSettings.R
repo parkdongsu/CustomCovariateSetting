@@ -52,6 +52,7 @@ getTopicFromNoteSettings <- function(connection,
                                      cohortId = cohortId, # cohortId 지정
                                      cdmVersion = "5",
                                      rowIdField = "subject_id",
+                                     conceptId = conceptId,
                                      covariateSettings,
                                      aggregated = FALSE){
 
@@ -69,7 +70,7 @@ getTopicFromNoteSettings <- function(connection,
             'JOIN @cohort_table c',
             'ON n.person_id = c.subject_id',
             'AND n.NOTE_DATE = c.COHORT_START_DATE',
-            'WHERE NOTE_TYPE_CONCEPT_ID = 44814637',
+            'WHERE NOTE_TYPE_CONCEPT_ID = @concept_id',
             #cohord_id가 지정되었을 때
             'AND cohort_definition_id = @cohort_id'
             )
@@ -79,6 +80,7 @@ getTopicFromNoteSettings <- function(connection,
         sql <- SqlRender::renderSql(sql,
                                     cohort_table = cohortTable,
                                     cohort_id = cohortId,
+                                    concept_id = conceptId,
                                     row_id_field = rowIdField,
                                     cdm_database_schema = cdmDatabaseSchema)$sql
         sql <- SqlRender::translateSql(sql, targetDialect = attr(connection, "dbms"))$sql
@@ -96,34 +98,25 @@ getTopicFromNoteSettings <- function(connection,
         # Convert colum names to camelCase:
         colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
 
-        ####unique numeric Id for each covariates###################
-        covariates.df<-data.frame(covariates)
-
-        covariateId.factor<-as.factor(covariates.df$covariateId)
-
-        word <- levels(covariateId.factor)
-        num <- seq(levels(covariateId.factor))
-
-        covariateId_mapping_df <- data.frame('word' = word, 'num' = num,stringsAsFactors = F)
-
-        covariateRowId.factor<-as.factor(covariates.df$rowId)
-
-        rowId <- levels(covariateRowId.factor)
-        num <- seq(levels(covariateRowId.factor))
-
-        rowId_mapping_df <- data.frame('rowId' = rowId, 'num' = num,stringsAsFactors = F)
-
-        ############################################################
-
         if(covariateSettings$useTextToVec == TRUE){
             ##Text2Vec
             covariates <- covariates
+
+            covariateId.factor<-as.factor(covariates$covariateId)
+
+            covariateRef  <- data.frame(covariateId = seq(levels(covariateId.factor)),
+                                        covariateName = levels(covariateId.factor),
+                                        analysisId = 1,
+                                        conceptId = 0)
+            covariateRef <- ff::as.ffdf(covariateRef)
         }
 
         if(covariateSettings$useTopicModeling == TRUE){
 
-            covariates.df$rowId<-as.numeric(as.factor(covariates.df$rowId))
-            covariates.df$covariateId<-as.numeric(as.factor(covariates.df$covariateId))
+            covariates.df<-data.frame(covariates)
+
+            covariates.df$rowId <- as.numeric(as.factor(covariates$rowId))
+            covariates.df$covariateId<-as.numeric(as.factor(covariates$covariateId))
             covariates.df
 
             data <- Matrix::sparseMatrix(i=covariates.df$rowId,
@@ -135,32 +128,37 @@ getTopicFromNoteSettings <- function(connection,
             colnames(data) <- unique(covariates.df$covariateId)
 
             ##Topic Modeling
-            lda_model = LDA$new(n_topics = covariateSettings$numberOfTopics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+            lda_model = text2vec::LDA$new(n_topics = covariateSettings$numberOfTopics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
             doc_topic_distr =   lda_model$fit_transform(x = data, n_iter = 1000,
                                                         convergence_tol = 0.001, n_check_convergence = 25,
                                                         progressbar = FALSE)
 
-            data.frame(doc_topic_distr)
+            doc_topic_distr_df <- data.frame(doc_topic_distr)
 
+            zzz <- unique(data.frame(covariates$rowId,covariates.df$rowId,stringsAsFactors = F))
+
+
+            #return 값이 row_id는 그대로/   id는 topic   /    value는 0.3
+
+            covariateRef  <- data.frame(covariateId = seq(levels(covariateId.factor)),
+                                        covariateName = levels(covariateId.factor),
+                                        analysisId = 1,
+                                        conceptId = 0)
+            covariateRef <- ff::as.ffdf(covariateRef)
         }
 
         if(covariateSettings$useGloVe == TRUE){
-
+            break
         }
 
         if(covariateSettings$useAutoencoder == TRUE){
-
+            break
         }
 
 
 
 
-        # Construct covariate reference:
-        covariateRef  <- data.frame(covariateId = 1,
-                                   covariateName = "Length of observation",
-                                   analysisId = 1,
-                                   conceptId = 0)
-        covariateRef <- ff::as.ffdf(covariateRef)
+
 
         # Construct analysis reference:
         analysisRef <- data.frame(analysisId = 1,

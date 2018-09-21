@@ -35,10 +35,6 @@ createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
         }
     }
 }
-?stop
-
-
-FeatureExtraction::createCovariateSettings(useDemographicsGender = F)
 
 
 
