@@ -7,6 +7,6 @@
 #' @examples
 #' diction()
 diction <- function(){
-    dic <- read.csv('D:/Dongsu/NLP_Sample/R_CODE/DIC/medi_dic.csv',stringsAsFactors = F)
+    dic <- read.csv('./DIC/medi_dic.csv',stringsAsFactors = F)
     return(dic)
 }
