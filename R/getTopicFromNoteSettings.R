@@ -117,7 +117,6 @@ getTopicFromNoteSettings <- function(connection,
 
             covariates.df$rowId <- as.numeric(as.factor(covariates$rowId))
             covariates.df$covariateId<-as.numeric(as.factor(covariates$covariateId))
-            covariates.df
 
             data <- Matrix::sparseMatrix(i=covariates.df$rowId,
                                          j=covariates.df$covariateId,
@@ -135,7 +134,7 @@ getTopicFromNoteSettings <- function(connection,
 
             doc_topic_distr_df <- data.frame(doc_topic_distr)
 
-            zzz <- unique(data.frame(covariates$rowId,covariates.df$rowId,stringsAsFactors = F))
+
 
 
             #return 값이 row_id는 그대로/   id는 topic   /    value는 0.3
