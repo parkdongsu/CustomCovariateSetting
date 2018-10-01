@@ -21,23 +21,23 @@ NLP_PROCESSING <- function(xmldf){
     xmldf <- gsub("\\/","", xmldf)
     xmldf <- gsub("\\'"," ", xmldf)
     xmldf <- gsub('\\"'," ", xmldf)
-    xmldf <- gsub("[~!@#$><%≥=^&×*-:●★¤]"," ", xmldf)
+    xmldf <- gsub("[~!@#$><%???=^&??*-:????????]"," ", xmldf)
 
-    xmldf <- gsub('“', " ", xmldf)
-    xmldf <- gsub('”', " ", xmldf)
-    xmldf <- gsub('‘', " ", xmldf)
-    xmldf <- gsub('’', " ", xmldf)
+    xmldf <- gsub('???', " ", xmldf)
+    xmldf <- gsub('???', " ", xmldf)
+    xmldf <- gsub('???', " ", xmldf)
+    xmldf <- gsub('???', " ", xmldf)
 
     xmldf <-xmldf <- gsub(',', " ", xmldf)
 
     xmldf<- tolower(xmldf)
 
-    xmldf <- gsub('[ㅏ-ㅣ]*','',xmldf)
-    xmldf <- gsub('[ㄱ-ㅎ]*','',xmldf)
+    xmldf <- gsub('[???-???]*','',xmldf)
+    xmldf <- gsub('[???-???]*','',xmldf)
 
 
-    pos_start <- as.vector(gregexpr('[^가-힣 ]*[A-Za-z]+[^가-힣 ]*',xmldf)[[1]])
-    pos_length <- as.vector(attr(gregexpr('[^가-힣 ]*[A-Za-z]+[^가-힣 ]*',xmldf)[[1]],'match.length'))
+    pos_start <- as.vector(gregexpr('[^???-??? ]*[A-Za-z]+[^???-??? ]*',xmldf)[[1]])
+    pos_length <- as.vector(attr(gregexpr('[^???-??? ]*[A-Za-z]+[^???-??? ]*',xmldf)[[1]],'match.length'))
     pos_end <- pos_start+pos_length-1
 
     word_data <- c()

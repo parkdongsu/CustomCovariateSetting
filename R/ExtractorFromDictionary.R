@@ -6,7 +6,7 @@
 #' @export
 #' @examples
 #' DIC_COMPARE()
-DIC_COMPARE <- function(doc.df){
+ExtractorFromDictionary <- function(doc.df){
 
     dictionary <- diction()
     colnames(dictionary) <- c('word')
@@ -72,7 +72,7 @@ DIC_COMPARE <- function(doc.df){
     for(i in 1:nrow(doc.df)){
         word <- strsplit(doc.df$'word'[i],' ')[[1]]
 
-        #영어는 따로 분리
+        #????????? ?????? ??????
         eng_word <- gsub('[^a-zA-Z]','',word)
         eng_word[length(eng_word)+1] <- c("")
         only_eng <- eng_word[-which(eng_word == "")]
@@ -83,7 +83,7 @@ DIC_COMPARE <- function(doc.df){
 
         diag_word_tmp_tmp_df <- data.frame('row_id' = rep(doc.df$row_id[i],length(diag_word)),'word' = diag_word,stringsAsFactors = F)
 
-        #rbind 나눠서 진행
+        #rbind ????????? ??????
         diag_word_tmp_df <- rbind(diag_word_tmp_df,diag_word_tmp_tmp_df)
         if(i %% 100 == 0){
             diag_word_df <- rbind(diag_word_df,diag_word_tmp_df)
