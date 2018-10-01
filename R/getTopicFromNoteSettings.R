@@ -36,6 +36,12 @@ if(!require(parallel)) {
 if(!require(caret)) {
     install.packages("caret")
 }
+if(!require(caret)) {
+    install.packages("text2vec")
+}
+if(!require(caret)) {
+    install.packages("e1071")
+}
 
 
 library(KoNLP)
