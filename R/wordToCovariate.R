@@ -5,14 +5,14 @@
 #' @keywordsa createCovariateSetting
 #' @export
 #' @examples
-#' WORD_LOAD()
-WORD_LOAD <- function(rowid,covariatesvalue){
+#' wordToCovariate()
+wordToCovariate <- function(rowid,covariatesvalue,useDictionary){
 
-    result_xml_df <- XML_PASING_FUNCTION(rowid,covariatesvalue)
+    result_xml_df <- NoteXmlParser(rowid,covariatesvalue)
 
-    doc.df <- NLP_PROCESSING_FUNCTION(result_xml_df)
+    doc.df <- LanguagePreProcessingFunction(result_xml_df)
 
-    df <- DIC_COMPARE(doc.df)
+    df <- ExtractorFromDictionary(doc.df)
     df <- cbind(df,rep(1,nrow(df)))
     colnames(df) <- c('row_id','covariate_id','covariate_value')
 

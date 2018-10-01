@@ -5,8 +5,8 @@
 #' @keywordsa createCovariateSetting
 #' @export
 #' @examples
-#' XML_PASING_FUNCTION()
-XML_PASING_FUNCTION <- function(rowid,covariatesvalue){
+#' NoteXmlParser()
+NoteXmlParser <- function(rowid,covariatesvalue){
 
     numCores <- parallel::detectCores() - 1
 

@@ -1,15 +1,17 @@
 #' Custom createCoveriate Settings
 #'
 #' This function is Custom createCoveriate Settings.
-#' @param connection,oracleTempSchema,cdmDatabaseSchema,cohortTable,cohortId,cdmVersion,rowIdField,covariateSettings,aggregated
-#' @keywordsa createCovariateSetting
-#' @export
-#' @examples
+#' @connection connection,oracleTempSchema,cdmDatabaseSchema,cohortTable,cohortId,cdmVersion,rowIdField,covariateSettings,aggregated
+#' @oracleTempSchema createCovariateSetting
+#' @cdmDatabaseSchema
+#' @cohortTable
+#' @cohortId
+#' @cdmVersion
+#' @rowIdField
+#' @noteConceptId
+#' @covariateSettings
+#' @aggregated
 #' getTopicFromNoteSettings()
-
-# load packages
-
-
 
 # load packages
 if(!require(rJava)) {
@@ -31,6 +33,10 @@ if(!require(NLP)) {
 if(!require(parallel)) {
     install.packages("parallel")
 }
+if(!require(caret)) {
+    install.packages("caret")
+}
+
 
 library(KoNLP)
 library(rJava)
@@ -48,11 +54,10 @@ getTopicFromNoteSettings <- function(connection,
                                      oracleTempSchema = NULL,
                                      cdmDatabaseSchema,
                                      cohortTable = "cohort",
-                                     #cohortId = -1, #cohortId 미지정
-                                     cohortId = cohortId, # cohortId 지정
+                                     cohortId = -1,
                                      cdmVersion = "5",
                                      rowIdField = "subject_id",
-                                     conceptId = conceptId,
+                                     noteConceptId = noteConceptId,
                                      covariateSettings,
                                      aggregated = FALSE){
 
@@ -70,17 +75,14 @@ getTopicFromNoteSettings <- function(connection,
             'JOIN @cohort_table c',
             'ON n.person_id = c.subject_id',
             'AND n.NOTE_DATE = c.COHORT_START_DATE',
-            'WHERE NOTE_TYPE_CONCEPT_ID = @concept_id',
-            #cohord_id가 지정되었을 때
-            'AND cohort_definition_id = @cohort_id'
+            'WHERE NOTE_TYPE_CONCEPT_ID = @note_concept_id',
+            '{@cohort_id != -1} ? {AND cohort_definition_id = @cohort_id}'
             )
-        #cohort_id가 지정되지 않았을 때
-        #"{@cohort_id != -1} ? {AND cohort_definition_id = @cohort_id}"
 
         sql <- SqlRender::renderSql(sql,
                                     cohort_table = cohortTable,
                                     cohort_id = cohortId,
-                                    concept_id = conceptId,
+                                    note_concept_id = noteConceptId,
                                     row_id_field = rowIdField,
                                     cdm_database_schema = cdmDatabaseSchema)$sql
         sql <- SqlRender::translateSql(sql, targetDialect = attr(connection, "dbms"))$sql
@@ -88,22 +90,20 @@ getTopicFromNoteSettings <- function(connection,
 
 
         # Retrieve the covariate:
-        covariates <- DatabaseConnector::querySql.ffdf(connection, sql)
+        rawCovariates <- DatabaseConnector::querySql.ffdf(connection, sql)
+        colnames(rawCovariates)<-tolower(colnames(rawCovariates))
+        row_id              <-  rawCovariates$row_id
+        covariates_value    <- rawCovariates$covariate_id
 
-        row_id              <-  covariates$ROW_ID
-        covariates_value    <- covariates$COVARIATE_ID
-
-        covariates <- WORD_LOAD(row_id,covariates_value)
+        covariates <- wordToCovariate(row_id,covariates_value,useDictionary)
 
         # Convert colum names to camelCase:
         colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
+        rowIds<-levels(as.factor(covariates$rowId))
 
         if(covariateSettings$useTextToVec == TRUE){
             ##Text2Vec
-            covariates <- covariates
-
             covariateId.factor<-as.factor(covariates$covariateId)
-
             covariateRef  <- data.frame(covariateId = seq(levels(covariateId.factor)),
                                         covariateName = levels(covariateId.factor),
                                         analysisId = 1,
@@ -114,7 +114,6 @@ getTopicFromNoteSettings <- function(connection,
         if(covariateSettings$useTopicModeling == TRUE){
 
             covariates.df<-data.frame(covariates)
-
             covariates.df$rowId <- as.numeric(as.factor(covariates$rowId))
             covariates.df$covariateId<-as.numeric(as.factor(covariates$covariateId))
 
@@ -122,47 +121,44 @@ getTopicFromNoteSettings <- function(connection,
                                          j=covariates.df$covariateId,
                                          x=covariates.df$covariateValue,
                                          dims=c(max(covariates.df$rowId), max(covariates.df$covariateId))) # edit this to max(map$newIds)
-
-
             colnames(data) <- unique(covariates.df$covariateId)
+
+            dim(data)
 
             ##Topic Modeling
             lda_model = text2vec::LDA$new(n_topics = covariateSettings$numberOfTopics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
-            doc_topic_distr =   lda_model$fit_transform(x = data, n_iter = 1000,
+            doc_topic_distr = lda_model$fit_transform(x = data, n_iter = 1000,
                                                         convergence_tol = 0.001, n_check_convergence = 25,
                                                         progressbar = FALSE)
 
             doc_topic_distr_df <- data.frame(doc_topic_distr)
+            covariateIds<-as.numeric(1:length(doc_topic_distr_df))
+            colnames(doc_topic_distr_df)<-covariateIds
+            doc_topic_distr_df$rowId<-rowIds
 
-
-
-
-            #return 값이 row_id는 그대로/   id는 topic   /    value는 0.3
-
-            covariateRef  <- data.frame(covariateId = seq(levels(covariateId.factor)),
-                                        covariateName = levels(covariateId.factor),
+            covariates<-reshape2::melt(doc_topic_distr_df,id.var = "rowId",
+                                               variable.name="covariateId",
+                                               value.name = "covariateValue")
+            ##need to remove 0
+            covariateRef  <- data.frame(covariateId = covariateIds,
+                                        covariateName = paste0("Topic",covariateIds),
                                         analysisId = 1,
                                         conceptId = 0)
             covariateRef <- ff::as.ffdf(covariateRef)
         }
 
         if(covariateSettings$useGloVe == TRUE){
-            break
+            stop("useGlove has not not supported yet")
         }
 
         if(covariateSettings$useAutoencoder == TRUE){
-            break
+            stop("useAutoencoder has not not supported yet")
         }
-
-
-
-
-
 
         # Construct analysis reference:
         analysisRef <- data.frame(analysisId = 1,
-                                  analysisName = "Length of observation",
-                                  domainId = "Demographics",
+                                  analysisName = "Features from Note",
+                                  domainId = "Note",
                                   startDay = 0,
                                   endDay = 0,
                                   isBinary = "N",

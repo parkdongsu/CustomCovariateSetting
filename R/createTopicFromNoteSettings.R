@@ -27,6 +27,7 @@ createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
                                       useDictionary=useDictionary,
                                       useTextToVec=useTextToVec,
                                       useTopicModeling=useTopicModeling,
+                                      numberOfTopics = numberOfTopics,
                                       useGloVe=useGloVe,
                                       useAutoencoder=useAutoencoder)
             attr(covariateSettings,'fun') <- 'getTopicFromNoteSettings'

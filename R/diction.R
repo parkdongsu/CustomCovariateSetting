@@ -7,6 +7,8 @@
 #' @examples
 #' diction()
 diction <- function(){
-    dic <- read.csv('./DIC/medi_dic.csv',stringsAsFactors = F)
+
+    dic <- read.csv(paste(getwd(),'/MedicalDictionary/KOREA.csv',sep=''),stringsAsFactors = F)
     return(dic)
 }
+
