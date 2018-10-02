@@ -8,9 +8,8 @@
 #' diction()
 diction <- function(){
 
-    return(dic_utf)
+    return(kor_dic.txt)
 }
-
 
 
 
