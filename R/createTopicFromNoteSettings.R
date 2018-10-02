@@ -7,6 +7,7 @@
 #' @examples
 #' createTopicFromNoteSettings()
 createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
+                                        noteConceptId = noteConceptId,
                                         useDictionary=TRUE,
                                         useTextToVec = FALSE,
                                         useTopicModeling=FALSE,
@@ -14,7 +15,8 @@ createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
                                         useGloVe = FALSE,
                                         LatentDimensionForGlove = 100L,
                                         useAutoencoder=FALSE,
-                                        LatentDimensionForAutoEncoder = 100L){
+                                        LatentDimensionForAutoEncoder = 100L,
+                                        sampleSize=-1){
     if(sum(useDictionary) == 0){
         stop('Not implemented.')
     }
@@ -24,12 +26,14 @@ createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
         }
         else{
             covariateSettings <- list(useTopicFromNote = useTopicFromNote,
+                                      noteConceptId = noteConceptId,
                                       useDictionary=useDictionary,
                                       useTextToVec=useTextToVec,
                                       useTopicModeling=useTopicModeling,
                                       numberOfTopics = numberOfTopics,
                                       useGloVe=useGloVe,
-                                      useAutoencoder=useAutoencoder)
+                                      useAutoencoder=useAutoencoder,
+                                      sampleSize=sampleSize)
             attr(covariateSettings,'fun') <- 'getTopicFromNoteSettings'
             class(covariateSettings) <- 'covariateSettings'
             return(covariateSettings)

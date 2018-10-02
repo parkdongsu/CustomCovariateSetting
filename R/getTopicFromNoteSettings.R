@@ -63,10 +63,9 @@ getTopicFromNoteSettings <- function(connection,
                                      cohortId = -1,
                                      cdmVersion = "5",
                                      rowIdField = "subject_id",
-                                     noteConceptId = noteConceptId,
+                                     #noteConceptId = noteConceptId,
                                      covariateSettings,
-                                     aggregated = FALSE,
-                                     sampleSize=-1){
+                                     aggregated = FALSE){
 
     writeLines('Constructing TopicFromNote')
     if (covariateSettings$useTopicFromNote == FALSE) {
@@ -91,9 +90,9 @@ getTopicFromNoteSettings <- function(connection,
         sql <- SqlRender::renderSql(sql,
                                     cohort_table = cohortTable,
                                     cohort_id = cohortId,
-                                    note_concept_id = noteConceptId,
+                                    note_concept_id = covariateSettings$noteConceptId,
                                     row_id_field = rowIdField,
-                                    sampleSize=sampleSize,
+                                    sampleSize=covariateSettings$sampleSize,
                                     cdm_database_schema = cdmDatabaseSchema)$sql
         sql <- SqlRender::translateSql(sql, targetDialect = attr(connection, "dbms"))$sql
 
