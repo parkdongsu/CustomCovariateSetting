@@ -8,7 +8,7 @@
 #' diction()
 diction <- function(){
 
-    return(kor_dictionary_db)
+    return(eng_dic.txt)
 }
 
 
