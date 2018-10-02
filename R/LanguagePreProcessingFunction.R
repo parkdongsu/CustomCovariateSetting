@@ -28,7 +28,7 @@ LanguagePreProcessingFunction <- function(result_xml_df){
 
     word_df <- data.frame('diagnosis' = parallel::parApply(myCluster,xml_df,1,NLP_PROCESSING),stringsAsFactors = F)
 
-    doc.df <- data.frame(c(word_df),'row_id' = search_df$row_id,stringsAsFactors = F)
+    doc.df <- data.frame('word' = word_df$diagnosis,'row_id' = search_df$row_id,stringsAsFactors = F)
 
     #result_word_list <- apply(word_df,1,POS_ANALYSIS)
 
