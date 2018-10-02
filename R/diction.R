@@ -7,10 +7,7 @@
 #' @examples
 #' diction()
 diction <- function(){
-
-    dic1 <- read.csv(paste(getwd(),'/MedicalDictionary/KOREA.csv',sep=''))
-
-    return(dic1)
+    return(dic)
 }
 
 
