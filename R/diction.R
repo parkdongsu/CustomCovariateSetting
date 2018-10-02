@@ -8,7 +8,9 @@
 #' diction()
 diction <- function(){
 
-    return(dic)
+    dic1 <- read.csv('MedicalDictionary/KOREA.csv')
+
+    return(dic1)
 }
 
 
