@@ -15,7 +15,7 @@ DIAG_PROCESSING <- function(diag_list){
     text_data_vector <- substr(diag_list,tag_vector+1,text_vector-1)
 
     first_tag_vector <- as.vector(regexpr(tag_data_vector[1],tag_data_vector))
-    
+
     data =c()
     for (i in 1:length(first_tag_vector)){
         if (first_tag_vector[i] == 1){
@@ -24,14 +24,14 @@ DIAG_PROCESSING <- function(diag_list){
     }
 
     data <- data[!is.na(data)]
-    
+
     data[length(data)+1] <- length(first_tag_vector)+1
-    
+
     df <- data.frame(stringsAsFactors = FALSE)
     for (i in unique(tag_data_vector)){
         df[i] <- character(0)
     }
-    
+
     cnt <- 1
     for (i in 1:(length(data)-1)){
         val <- (data[i+1])-(data[i])
@@ -40,6 +40,6 @@ DIAG_PROCESSING <- function(diag_list){
             cnt <- cnt+1
         }
     }
-    
+
     return(df)
 }

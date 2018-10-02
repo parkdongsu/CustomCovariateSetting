@@ -8,7 +8,6 @@
 #' LanguagePreProcessingFunction()
 LanguagePreProcessingFunction <- function(result_xml_df){
 
-
     numCores <- parallel::detectCores() - 1
 
     myCluster <- parallel::makeCluster(numCores)
@@ -27,15 +26,17 @@ LanguagePreProcessingFunction <- function(result_xml_df){
 
     xml_df <- search_df[tag]
 
-    word_df <- as.data.frame(parallel::parApply(myCluster,xml_df,1,NLP_PROCESSING),stringsAsFactors = F)
+    word_df <- data.frame('diagnosis' = parallel::parApply(myCluster,xml_df,1,NLP_PROCESSING),stringsAsFactors = F)
 
-    result_word_list <- apply(word_df,1,POS_ANALYSIS)
+    doc.df <- data.frame(c(word_df),'row_id' = search_df$row_id,stringsAsFactors = F)
 
-    result_word_list<- unlist(result_word_list)
+    #result_word_list <- apply(word_df,1,POS_ANALYSIS)
 
-    doc.list <- parallel::parLapply(myCluster,result_word_list,K_POS_EXTRACTION)
+    #result_word_list<- unlist(result_word_list)
 
-    doc.df <- data.frame('word' = unlist(doc.list),'row_id' = search_df$row_id ,stringsAsFactors = FALSE)
+    #doc.list <- parallel::parLapply(myCluster,result_word_list,K_POS_EXTRACTION)
+
+    #doc.df <- data.frame('word' = unlist(doc.list),'row_id' = search_df$row_id ,stringsAsFactors = FALSE)
 
     parallel::stopCluster(myCluster)
 

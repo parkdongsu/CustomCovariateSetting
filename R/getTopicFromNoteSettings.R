@@ -44,7 +44,7 @@ if(!require(caret)) {
 }
 
 
-library(KoNLP)
+#library(KoNLP)
 library(rJava)
 library(stringr)
 library(parallel)
@@ -65,7 +65,8 @@ getTopicFromNoteSettings <- function(connection,
                                      rowIdField = "subject_id",
                                      noteConceptId = noteConceptId,
                                      covariateSettings,
-                                     aggregated = FALSE){
+                                     aggregated = FALSE,
+                                     sampleSize=-1){
 
     writeLines('Constructing TopicFromNote')
     if (covariateSettings$useTopicFromNote == FALSE) {
@@ -74,7 +75,9 @@ getTopicFromNoteSettings <- function(connection,
     if (covariateSettings$useDictionary == TRUE){
         # Some SQL to construct the covariate:
         sql <- paste(
-            'SELECT top 100 @row_id_field AS row_id,',
+            'SELECT',
+            '{@sampleSize != -1} ? {TOP @sampleSize}',
+            " @row_id_field AS row_id,",
             'n.NOTE_TEXT AS covariate_id,',
             '1 AS covariate_value',
             'FROM @cdm_database_schema.NOTE n',
@@ -90,6 +93,7 @@ getTopicFromNoteSettings <- function(connection,
                                     cohort_id = cohortId,
                                     note_concept_id = noteConceptId,
                                     row_id_field = rowIdField,
+                                    sampleSize=sampleSize,
                                     cdm_database_schema = cdmDatabaseSchema)$sql
         sql <- SqlRender::translateSql(sql, targetDialect = attr(connection, "dbms"))$sql
 
