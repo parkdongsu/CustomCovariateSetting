@@ -16,6 +16,7 @@ createTopicFromNoteSettings <- function(useTopicFromNote = TRUE,
                                         LatentDimensionForGlove = 100L,
                                         useAutoencoder=FALSE,
                                         LatentDimensionForAutoEncoder = 100L,
+                                        language="Korean",
                                         sampleSize=-1){
     if(sum(useDictionary) == 0){
         stop('Not implemented.')
