@@ -6,7 +6,7 @@
 #' @export
 #' @examples
 #' wordToCovariate()
-wordToCovariate <- function(rowid,covariatesvalue,useDictionary){
+wordToCovariate <- function(rowid,covariatesvalue,useDictionary,language){
 
     result_xml_df <- NoteXmlParser(rowid,covariatesvalue)
 

@@ -104,7 +104,7 @@ getTopicFromNoteSettings <- function(connection,
         row_id              <-  rawCovariates$row_id
         covariates_value    <- rawCovariates$covariate_id
 
-        covariates <- wordToCovariate(row_id,covariates_value,useDictionary,covariateSettings$language)
+        covariates <- wordToCovariate(row_id,covariates_value,useDictionary,language=covariateSettings$language)
 
         # Convert colum names to camelCase:
         colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
