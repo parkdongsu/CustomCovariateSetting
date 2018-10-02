@@ -7,8 +7,7 @@
 #' @examples
 #' diction()
 diction <- function(){
-
-    return(w)
+    return(kor_dictionary_db)
 }
 
 
