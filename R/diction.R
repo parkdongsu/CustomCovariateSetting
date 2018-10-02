@@ -8,7 +8,7 @@
 #' diction()
 diction <- function(){
 
-    dic1 <- read.csv('MedicalDictionary/KOREA.csv')
+    dic1 <- read.csv(paste(getwd(),'/MedicalDictionary/KOREA.csv',sep=''))
 
     return(dic1)
 }
