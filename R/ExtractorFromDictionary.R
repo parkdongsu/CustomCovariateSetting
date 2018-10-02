@@ -6,9 +6,13 @@
 #' @export
 #' @examples
 #' ExtractorFromDictionary()
-ExtractorFromDictionary  <- function(doc.df){
+ExtractorFromDictionary  <- function(doc.df,language){
 
-    dictionary <- diction()
+    if(language=="Korean") {
+        dictionary = kor_dictionary_db
+    } else {
+        stop("Currently only Korean is available")
+    }
     colnames(dictionary) <- c('word')
 
     kor_tmp_word <- c()

@@ -17,9 +17,9 @@
 if(!require(rJava)) {
     install.packages('rJava')
 }
-if(!require(KoNLP)) {
-    install.packages('KoNLP')
-}
+# if(!require(KoNLP)) {
+#     install.packages('KoNLP')
+# }
 if(!require(devtools)) {
     install.packages('devtools')
 }
@@ -52,7 +52,7 @@ library(caret)
 library(dplyr)
 library(text2vec)
 library(e1071)
-useSejongDic()
+# useSejongDic()
 
 
 
@@ -104,7 +104,7 @@ getTopicFromNoteSettings <- function(connection,
         row_id              <-  rawCovariates$row_id
         covariates_value    <- rawCovariates$covariate_id
 
-        covariates <- wordToCovariate(row_id,covariates_value,useDictionary)
+        covariates <- wordToCovariate(row_id,covariates_value,useDictionary,covariateSettings$language)
 
         # Convert colum names to camelCase:
         colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))

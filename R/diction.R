@@ -7,7 +7,12 @@
 #' @examples
 #' diction()
 diction <- function(){
-    return(kor_dictionary_db)
+    if(language=="Korean") {
+        dicDb = kor_dictionary_db
+    } else {
+            stop("Currently only Korean is available")
+        }
+    return(dicDb)
 }
 
 
