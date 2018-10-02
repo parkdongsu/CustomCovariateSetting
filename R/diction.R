@@ -8,7 +8,7 @@
 #' diction()
 diction <- function(){
 
-    return(eng_dic.txt)
+    return(w)
 }
 
 
