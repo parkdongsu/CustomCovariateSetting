@@ -7,7 +7,8 @@
 #' @examples
 #' diction()
 diction <- function(){
-    return(dic)
+
+    return(dic_utf)
 }
 
 
