@@ -143,6 +143,8 @@ getTopicFromNoteSettings <- function(connection,
             covariates<-reshape2::melt(doc_topic_distr_df,id.var = "rowId",
                                                variable.name="covariateId",
                                                value.name = "covariateValue")
+            covariates$covariateId<-as.numeric(as.character(covariates$covariateId))
+            covariates<-covariates[covariates$covariateValue!=0,]
             covariates<-ff::as.ffdf(covariates)
             ##need to remove 0
             covariateRef  <- data.frame(covariateId = covariateIds,
