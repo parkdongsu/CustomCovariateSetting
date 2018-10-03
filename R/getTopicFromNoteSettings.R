@@ -17,9 +17,6 @@
 if(!require(rJava)) {
     install.packages('rJava')
 }
-if(!require(KoNLP)) {
-    install.packages('KoNLP')
-}
 if(!require(devtools)) {
     install.packages('devtools')
 }
@@ -52,9 +49,6 @@ library(caret)
 library(dplyr)
 library(text2vec)
 library(e1071)
-useSejongDic()
-
-
 
 getTopicFromNoteSettings <- function(connection,
                                      oracleTempSchema = NULL,
