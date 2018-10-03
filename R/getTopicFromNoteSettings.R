@@ -109,7 +109,7 @@ getTopicFromNoteSettings <- function(connection,
             covariateId.factor<-as.factor(covariates$covariateId)
             covariateRef  <- data.frame(covariateId = seq(levels(covariateId.factor)),
                                         covariateName = levels(covariateId.factor),
-                                        analysisId = 1,
+                                        analysisId = 0,
                                         conceptId = 0)
             covariateRef <- ff::as.ffdf(covariateRef)
         }
@@ -135,7 +135,7 @@ getTopicFromNoteSettings <- function(connection,
                                                         progressbar = FALSE)
 
             doc_topic_distr_df <- data.frame(doc_topic_distr)
-            covariateIds<-as.numeric(1:length(doc_topic_distr_df))
+            covariateIds<-as.numeric(paste0(as.numeric(1:length(doc_topic_distr_df)),'00'))
             colnames(doc_topic_distr_df)<-covariateIds
             doc_topic_distr_df$rowId<-rowIds
 
@@ -145,7 +145,7 @@ getTopicFromNoteSettings <- function(connection,
             ##need to remove 0
             covariateRef  <- data.frame(covariateId = covariateIds,
                                         covariateName = paste0("Topic",covariateIds),
-                                        analysisId = 1,
+                                        analysisId = 0,
                                         conceptId = 0)
             covariateRef <- ff::as.ffdf(covariateRef)
         }
@@ -159,7 +159,7 @@ getTopicFromNoteSettings <- function(connection,
         }
 
         # Construct analysis reference:
-        analysisRef <- data.frame(analysisId = 1,
+        analysisRef <- data.frame(analysisId = 0,
                                   analysisName = "Features from Note",
                                   domainId = "Note",
                                   startDay = 0,
