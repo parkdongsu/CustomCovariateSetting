@@ -17,9 +17,6 @@
 if(!require(rJava)) {
     install.packages('rJava')
 }
-if(!require(KoNLP)) {
-    install.packages('KoNLP')
-}
 if(!require(devtools)) {
     install.packages('devtools')
 }
@@ -52,9 +49,6 @@ library(caret)
 library(dplyr)
 library(text2vec)
 library(e1071)
-useSejongDic()
-
-
 
 getTopicFromNoteSettings <- function(connection,
                                      oracleTempSchema = NULL,
@@ -72,7 +66,8 @@ getTopicFromNoteSettings <- function(connection,
         return(NULL)
     }
     if (covariateSettings$useDictionary == TRUE){
-        # Some SQL to construct the covariate:
+        #SQL query should be revised to extract only the latest record
+        #SQL to construct the covariate:
         sql <- paste(
             'SELECT',
             '{@sampleSize != -1} ? {TOP @sampleSize}',
@@ -96,43 +91,42 @@ getTopicFromNoteSettings <- function(connection,
                                     cdm_database_schema = cdmDatabaseSchema)$sql
         sql <- SqlRender::translateSql(sql, targetDialect = attr(connection, "dbms"))$sql
 
-
-
         # Retrieve the covariate:
         rawCovariates <- DatabaseConnector::querySql.ffdf(connection, sql)
         colnames(rawCovariates)<-tolower(colnames(rawCovariates))
         row_id              <-  rawCovariates$row_id
         covariates_value    <- rawCovariates$covariate_id
 
-        covariates <- wordToCovariate(row_id,covariates_value,useDictionary)
+        #covariates <- wordToCovariate(row_id,covariates_value,useDictionary)
+        result_xml_df <- NoteXmlParser(row_id,covariates_value)
+        doc.df <- LanguagePreProcessingFunction(result_xml_df)
+        df <- ExtractorFromDictionary(doc.df)
+        covariates <- cbind(df,rep(1,nrow(df)))
+        colnames(covariates) <- c('rowId','covariateId','covariateValue')
+        covariateId.factor<-as.factor(covariates$covariateId)
 
-        # Convert colum names to camelCase:
-        colnames(covariates) <- SqlRender::snakeCaseToCamelCase(colnames(covariates))
-        rowIds<-levels(as.factor(covariates$rowId))
-
+        #rowIds<-levels(as.factor(covariates$rowId))
         if(covariateSettings$useTextToVec == TRUE){
             ##Text2Vec
-            covariateId.factor<-as.factor(covariates$covariateId)
-            covariateRef  <- data.frame(covariateId = seq(levels(covariateId.factor)),
-                                        covariateName = levels(covariateId.factor),
-                                        analysisId = 1,
+            covariates$covariateId<-as.numeric(paste0(9999,as.numeric(covariateId.factor)))
+            covariates<-ff::as.ffdf(covariates)
+
+            covariateRef  <- data.frame(covariateId = as.numeric(paste0(9999,seq(levels(covariateId.factor)) )),
+                                        covariateName = paste0("NOTE-",levels(covariateId.factor)),
+                                        analysisId = 0,
                                         conceptId = 0)
             covariateRef <- ff::as.ffdf(covariateRef)
         }
 
         if(covariateSettings$useTopicModeling == TRUE){
+            covariates$covariateId<-as.numeric(as.factor(covariates$covariateId))
 
-            covariates.df<-data.frame(covariates)
-            covariates.df$rowId <- as.numeric(as.factor(covariates$rowId))
-            covariates.df$covariateId<-as.numeric(as.factor(covariates$covariateId))
+            data <- Matrix::sparseMatrix(i=covariates$rowId,
+                                         j=covariates$covariateId,
+                                         x=covariates$covariateValue, #add 0.1 to avoid to treated as binary values
+                                         dims=c(max(covariates$rowId), max(covariates$covariateId))) # edit this to max(map$newIds)
 
-            data <- Matrix::sparseMatrix(i=covariates.df$rowId,
-                                         j=covariates.df$covariateId,
-                                         x=covariates.df$covariateValue,
-                                         dims=c(max(covariates.df$rowId), max(covariates.df$covariateId))) # edit this to max(map$newIds)
-            colnames(data) <- unique(covariates.df$covariateId)
-
-            dim(data)
+            colnames(data) <- as.numeric(paste0(9999,seq(levels(covariateId.factor)) ))
 
             ##Topic Modeling
             lda_model = text2vec::LDA$new(n_topics = covariateSettings$numberOfTopics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
@@ -141,17 +135,21 @@ getTopicFromNoteSettings <- function(connection,
                                                         progressbar = FALSE)
 
             doc_topic_distr_df <- data.frame(doc_topic_distr)
-            covariateIds<-as.numeric(1:length(doc_topic_distr_df))
+
+            covariateIds<-as.numeric(paste0(9999,as.numeric(1:length(doc_topic_distr_df))))
             colnames(doc_topic_distr_df)<-covariateIds
-            doc_topic_distr_df$rowId<-rowIds
+            doc_topic_distr_df$rowId<- seq(max(covariates$rowId))
 
             covariates<-reshape2::melt(doc_topic_distr_df,id.var = "rowId",
                                                variable.name="covariateId",
                                                value.name = "covariateValue")
+            covariates$covariateId<-as.numeric(as.character(covariates$covariateId))
+            covariates<-covariates[covariates$covariateValue!=0,]
+            covariates<-ff::as.ffdf(covariates)
             ##need to remove 0
             covariateRef  <- data.frame(covariateId = covariateIds,
                                         covariateName = paste0("Topic",covariateIds),
-                                        analysisId = 1,
+                                        analysisId = 0,
                                         conceptId = 0)
             covariateRef <- ff::as.ffdf(covariateRef)
         }
@@ -165,7 +163,7 @@ getTopicFromNoteSettings <- function(connection,
         }
 
         # Construct analysis reference:
-        analysisRef <- data.frame(analysisId = 1,
+        analysisRef <- data.frame(analysisId = 0,
                                   analysisName = "Features from Note",
                                   domainId = "Note",
                                   startDay = 0,
